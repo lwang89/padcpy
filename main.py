@@ -33,10 +33,13 @@ def saveCB ():
 # 
 def viewCB ():
 	if overrideVar.get() == -1 or continuousViewVar.get()==1:
-		bookmarks = pad.allPads[pad.currentState].bookmarks
+		want = pad.currentState
 	else:
-		bookmarks = pad.allPads[overrideVar.get()].bookmarks
+		want = overrideVar.get()
 		overrideVar.set(-1)
+
+	bookmarks = pad.allPads[want].bookmarks
+	tellLabel["text"] = "Viewing: " + pad.brainCategories[want]
 
 	# Plug the bookmarks into the bookmark widgets
 	ndraw = min (len(bookmarks), len(bookmarkWidgets))
@@ -46,7 +49,7 @@ def viewCB ():
 
 	# Make the rest of them, if any, invisible
 	for i in range (ndraw, len(bookmarkWidgets)):
-		bookmarkWidgets[i].clearBookmark()
+		bookmarkWidgets[i].hideBookmark()
 
 #
 # Observer callback, ie when value changes: Toggle continuous view refresh.
@@ -58,9 +61,7 @@ def continuousViewVarCB (*ignoreargs):
 		# Optional if brain data is streaming anyway, just to start us off
 		viewCB()
 
-		viewButton["state"] = tk.DISABLED
-	else:
-		viewButton["state"] = tk.NORMAL
+	viewButton["state"] = tk.DISABLED if continuousViewVar.get()==1 else tk.NORMAL
 
 #
 # Similar, for save
@@ -69,9 +70,7 @@ def continuousSaveVarCB (*ignoreargs):
 	if continuousSaveVar.get()==1:
 		continuousSaveTick ()
 
-		saveButton["state"] = tk.DISABLED
-	else:
-		saveButton["state"] = tk.NORMAL
+	saveButton["state"] = tk.DISABLED if continuousSaveVar.get()==1 else tk.NORMAL
 
 #
 # Timer callback for continousSave
@@ -182,21 +181,6 @@ class BookmarkW:
 	def hideBookmark (self):
 		self.main.grid_forget()
 
-	# Make the widget blank, altn for those we currently don't need
-	def clearBookmark (self):
-		self.bookmark = None
-
-		# Empty out fields of all our widgets
-		self.thumbImage = None
-		self.thumbw.delete(tk.ALL)
-		self.titlew["text"] = ""
-		self.urlw["text"] = ""
-		self.selectionw["text"] = ""
-		self.timew["text"] = ""
-
-		# Ditto, set our parameters here not above
-		self.main.grid (sticky=tk.E + tk.W)
-
 	# Tell browser to go to our bookmarked page
 	def callback (self, ignoreevent):
 		pad.sendBookmark (self.bookmark.url)
@@ -241,6 +225,7 @@ def brainCB (line):
 		# ...which will also trigger a viewCB() so no need for us to call it
 
 # Our callback, ie when value of radio buttons change
+# manually or because brainCB() above changes them
 def brainVarCB (*ignoreargs):
 	pad.currentState = brainVar.get()
 
@@ -256,7 +241,7 @@ top.title ("Brain Scratchpad Prototype with Classifier")
 
 # Control panel area
 controlPanel = ttk.Frame (top)
-controlPanel.grid (row=0, column=0)
+controlPanel.grid (row=0, column=0, columnspan=2)
 
 # Our button style
 style = ttk.Style()
@@ -287,28 +272,38 @@ continuousSaveBox = ttk.Checkbutton (controlPanel, text="Save continuously", var
 continuousSaveVar.trace ("w", continuousSaveVarCB)
 continuousSaveBox.grid (row=1, column=1)
 
-# Override brain state (does not apply to view/save if each is in continuous mode)
-overrideFrame = tk.LabelFrame (controlPanel, text="Override for next command only")
-overrideFrame.grid (row=2, column=0, columnspan=2, sticky="we")
-overrideVar = tk.IntVar()
-b = tk.Radiobutton (overrideFrame, text="(None)", variable=overrideVar, value=-1)
-b.grid (row=0, column=0)
-for i in range (len (pad.brainCategories)):
-	b = tk.Radiobutton (overrideFrame, text=pad.brainCategories[i], variable=overrideVar, value=i)
-	b.grid (row=0, column=i+1)
-
 # Bookmarks panel area
 bookmarksPanel = ttk.Frame (top)
-bookmarksPanel.grid (row=2, column=0, pady=20)
+bookmarksPanel.grid (row=2, column=0, columnspan=2, pady=20)
 
-# Empty widgets, each can show a bookmark, max of 5 for now
+# Empty widgets, each can show a bookmark, arbitrarily 5
 bookmarkWidgets = []
 for i in range (5):
 	bookmarkWidgets.append (BookmarkW (bookmarksPanel))
 
+# Tell user what they're seeing (if not in continuous view mode)
+tellLabel = ttk.Label (top, style="tellLabel.TLabel")
+tellLabel["text"] = "Viewing: " + pad.brainCategories[pad.currentState]
+style.configure ("tellLabel.TLabel", font=('', 20, ''), foreground="saddlebrown")
+tellLabel.grid (row=3, column=0, sticky="ns")
+
+# Override brain state (does not apply to view or save if each is in continuous mode)
+overrideLabel = ttk.Label (text="Override for next command only", style="override.TLabel")
+style.configure ("override.TLabel", foreground="saddlebrown")
+overrideFrame = ttk.Labelframe (top, labelwidget=overrideLabel, style="override.TLabelframe")
+style.configure ("override.TLabelframe", foreground="saddlebrown")
+overrideFrame.grid (row=3, column=1)
+overrideVar = tk.IntVar()
+b = ttk.Radiobutton (overrideFrame, text="(None)", variable=overrideVar, value=-1, style="override.TRadiobutton")
+style.configure ("override.TRadiobutton", foreground="saddlebrown")
+b.grid (row=0, column=0)
+for i in range (len (pad.brainCategories)):
+	b = ttk.Radiobutton (overrideFrame, text=pad.brainCategories[i], variable=overrideVar, value=i, style="override.TRadiobutton")
+	b.grid (row=0, column=i+1)
+
 # Simulated brain input radio button panel
 brainFrame = tk.LabelFrame (top, text="Brain input")
-brainFrame.grid (row=3, column=0, pady=20, sticky="we")
+brainFrame.grid (row=4, column=0, columnspan=2, pady=20, sticky="we")
 
 brainVar = tk.IntVar()
 brainVar.trace ("w", brainVarCB)

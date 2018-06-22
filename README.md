@@ -26,52 +26,34 @@ perform the same tasks
 
 ## Conceptual Design
 
-You have several scratch pads (lists of web browser bookmarks)
+You have several "scratch pads" (lists of web browser bookmarks)
 
 * Each is associated with one of the brain
 states that the classifier can distinguish
 
-* Each contains web bookmarks thank you created while in the corresponding brain state.
+* Each contains web bookmarks thank you created while you were in the corresponding brain state.
 
 * The benefit of the system is that it chooses the appropriate scratchpad for you at all times, without your effort or attention.
-And you can override its choice if it guesses wrong.
+You can override its choice if it guesses wrong.
 
 
 ### Brain:
 
 The selection by brain state applies to both input and output:
 
-* Save: when you bookmark something, brain determines
+* Save: when you bookmark something, brain state determines
 which pad it goes to.
 
-* View: When you request information, brain determines
-which pad you get. (Or maybe just
-which one is displayed more prominently.)
+* View: When you request information, brain state determines
+which pad you get.
 
 ### View:
 
 Press View button = displays the pad that corresponds
 to current brain state.
 
-Optional command lets you
+Optional radio buttons at bottom let you
 manually override the choice of pad.
-
-TO DO MAYBE:
-
-	Avoid biofeedback effect, where the 2 peripheral windows
-	keep swapping as my brain state changes. Maybe it's very subtle.
-	*Or it only shows up when you try to bookmark something.
-
-	Otherwise, could I blend smoothly between the two scratch
-	pads, so that if we guess wrong it's not terrible. So the
-	system just makes one or the other scratchpad more prominent
-	but the other one is still tucked away but available. And
-	maybe new input goes to the more prominent one. Kind of like
-	the currently selected window in a GUI. Input goes to the
-	currently selected window, we switch to make different windows
-	currently selected based on your brain state. Remember here
-	that currently selected just means it's the featured
-	peripheral window, we're not messing with the main window.
 
 ### Save:
 
@@ -80,31 +62,52 @@ to current brain state.
 
 Optional manual override as above.
 
-TO DO
-	And the auxiliary display changes to the scratchpad you just
-	saved into? (which is usually the one that corresponds to your
-	current brain state, unless you used the pulldown override)
+If same URL was previously saved in the current pad, we do nothing.
 
-	And we should provide some manual control for choosing
-	the currently selected [peripheral] window, so you can
-	override the guess that our brain state makes
+### "Viewing" widget:
 
-	You press a button to bookmark something, but we also record
-	the amount of interest you had in it.
+Indicates which pad is currently being viewed and will currently be used for saving,
+in case the user's brain state has changed but the user hasn't pressed the
+"View" button lately.
+
+This is irrelevant in Continuous View mode.
+
+### Override radio buttons:
+
+Allows user to choose a different pad for the next View or Save command.
+
+Once chosen, it remains until the next command, then it is canceled.
+(Or choose "None" to cancel it)
+
+Does not apply to a View or Save command if in View continously or Save
+continuously mode respectively.
+
 
 ### Other plans:
+
+The bookmarks could also be marked with a separate orthogonal
+dimension giving interest or arousal at the time you bookmarked it
+(placeholder is implemented,
+could use bar graph display, like what padpy uses for distance,
+to display interest).
+
+Show all the pads, but prioritize based on brain state,
+so that if we guess wrong it's not terrible.
+That is, the system just makes one or another scratchpad more prominent
+but the others are still tucked away but available. And
+new inputs go to the more prominent one,
+rather like the currently selected window in a GUI. Input goes to the
+currently selected window, the system switches to make different "windows"
+become currently selected, based on brain state.
+Note that "currently selected" just means it's the featured
+side window, we're not messing with the main browser window.
 
 Maybe the choice of pads is based on spatial
 vs. verbal or some other category like that.
 
-The bookmarks could also be marked with a separate orthogonal
-dimension giving interest or arousal (placeholder is implemented,
-could use the bar graph that padpy uses for distance to display interest).
-
 Maybe we use context and other information as well as
-brain state to choose among several bookmarks or group or
-configurations, thinking again back to
-activity-based window managers as an analogy
+brain state to choose among several bookmarks or groups or
+configurations, analogous to activity-based window managers.
 
 Could associate some explicit index terms with the lists, like maybe 5:
 
@@ -123,19 +126,24 @@ Main window = vanilla Safari, running independently
 
 Bookmark window =
 
-* "Save" button and manual override
+* "Save" button
 
-* "View" button and manual override
+* "View" button
 
 * Bookmarks display
 
-* Sliders window = like other prototypes, not intended to be in final system
+* "Viewing" widget
+
+* Override radio buttons
+
+* Radio buttons for brain state = like other prototypes, not intended to be in final system
 
     * Also shows brain state back to the user
 
 Bookmarks display
 
-* Shows pad corresponding to brain state
+* Shows pad corresponding to brain state as of last View or Save command,
+or continuously.
 
 * If you click a bookmark it sends main browser there.
 
@@ -143,42 +151,6 @@ Bookmarks display
 with URL of the page it was on) when you Save, otherwise we just save the
 URL.
 
-TO DO:
-	Shows last scratchpad that I saved into,
-	i.e., don't respond visually to changing brain state
-	(unless/until user pushes Save button)
-
-	Sort by time
-	Sort by interest level
-	Visualize
-
-TO DO
-
-Save button = You press a button to bookmark something, but we also record
-the amount of interest you had in it.
-
-	Make it a button with a pulldown below it
-
-	if you just click it, it picks which scratchpad to use by your brain,
-	but pulldown lets you override
-
-	Save: if you select a region, we copy that (along
-	with URL of the page it was on), otherwise we just save the
-	URL.
-
-View scratchpad(s)
-	Continuously displays last saved-in or else last one
-	specifically viewed.
-	When Save, it displays that one.
-	When hit View, it switches to the one for the current brain state
-
-	Maybe another pull down button for viewing the scratchpad,
-	which shows me the scratchpad corresponding to my current
-	brain state, and the pulldown lets me override/choose
-	explicitly
-
-	Not clear if the scratchpad(s) is always visible, just the
-	appropriate one, just the one that was last used, all of them?
 
 ## Code Files
 

@@ -18,7 +18,11 @@ import brainclient
 # Save button callback: Save current page in appropriate pad
 #
 def saveCB ():
-	pad.allPads[pad.currentState].add (pad.getBookmark())
+	if overrideVar.get() == -1:
+		pad.allPads[pad.currentState].add (pad.getBookmark())
+	else:
+		pad.allPads[overrideVar.get()].add (pad.getBookmark())
+		overrideVar.set(-1)
 
 	# Update bookmarks display (optional)
 	viewCB()
@@ -28,7 +32,11 @@ def saveCB ():
 # is also called from some other places
 # 
 def viewCB ():
-	bookmarks = pad.allPads[pad.currentState].bookmarks
+	if overrideVar.get() == -1:
+		bookmarks = pad.allPads[pad.currentState].bookmarks
+	else:
+		bookmarks = pad.allPads[overrideVar.get()].bookmarks
+		overrideVar.set(-1)
 
 	# Plug the bookmarks into the bookmark widgets
 	ndraw = min (len(bookmarks), len(bookmarkWidgets))
@@ -264,6 +272,16 @@ continuousSaveBox = ttk.Checkbutton (controlPanel, text="Save continuously", var
 continuousSaveVar.trace ("w", continuousSaveVarCB)
 continuousSaveBox.grid (row=1, column=1)
 
+# Override brain state
+overrideFrame = tk.LabelFrame (controlPanel, text="Override for next command only")
+overrideFrame.grid (row=2, column=0, columnspan=2, sticky="we")
+overrideVar = tk.IntVar()
+b = tk.Radiobutton (overrideFrame, text="(None)", variable=overrideVar, value=-1)
+b.grid (row=0, column=0)
+for i in range (len (pad.brainCategories)):
+	b = tk.Radiobutton (overrideFrame, text=pad.brainCategories[i], variable=overrideVar, value=i)
+	b.grid (row=0, column=i+1)
+
 # Bookmarks panel area
 bookmarksPanel = ttk.Frame (top)
 bookmarksPanel.grid (row=2, column=0, pady=20)
@@ -274,13 +292,13 @@ for i in range (5):
 	bookmarkWidgets.append (BookmarkW (bookmarksPanel))
 
 # Simulated brain input radio button panel
-radioFrame = tk.LabelFrame (top, text="Brain input")
-radioFrame.grid (row=3, column=0, pady=20, sticky="we")
+brainFrame = tk.LabelFrame (top, text="Brain input")
+brainFrame.grid (row=3, column=0, pady=20, sticky="we")
 
 brainVar = tk.IntVar()
 brainVar.trace ("w", brainVarCB)
 for i in range (len (pad.brainCategories)):
-	b = tk.Radiobutton (radioFrame, text=pad.brainCategories[i], variable=brainVar, value=i)
+	b = tk.Radiobutton (brainFrame, text=pad.brainCategories[i], variable=brainVar, value=i)
 	b.grid (row=0, column=i)
 
 ############################################################

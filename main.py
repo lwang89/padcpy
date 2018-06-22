@@ -18,7 +18,7 @@ import brainclient
 # Save button callback: Save current page in appropriate pad
 #
 def saveCB ():
-	if overrideVar.get() == -1:
+	if overrideVar.get() == -1 or continuousSaveVar.get()==1:
 		pad.allPads[pad.currentState].add (pad.getBookmark())
 	else:
 		pad.allPads[overrideVar.get()].add (pad.getBookmark())
@@ -32,7 +32,7 @@ def saveCB ():
 # is also called from some other places
 # 
 def viewCB ():
-	if overrideVar.get() == -1:
+	if overrideVar.get() == -1 or continuousViewVar.get()==1:
 		bookmarks = pad.allPads[pad.currentState].bookmarks
 	else:
 		bookmarks = pad.allPads[overrideVar.get()].bookmarks
@@ -46,7 +46,7 @@ def viewCB ():
 
 	# Make the rest of them, if any, invisible
 	for i in range (ndraw, len(bookmarkWidgets)):
-		bookmarkWidgets[i].hideBookmark()
+		bookmarkWidgets[i].clearBookmark()
 
 #
 # Observer callback, ie when value changes: Toggle continuous view refresh.
@@ -55,7 +55,7 @@ def viewCB ():
 #
 def continuousViewVarCB (*ignoreargs):
 	if continuousViewVar.get()==1:
-		# Optional if brain data is streaming anyway, jus to start us off
+		# Optional if brain data is streaming anyway, just to start us off
 		viewCB()
 
 		viewButton["state"] = tk.DISABLED
@@ -68,13 +68,13 @@ def continuousViewVarCB (*ignoreargs):
 def continuousSaveVarCB (*ignoreargs):
 	if continuousSaveVar.get()==1:
 		continuousSaveTick ()
+
 		saveButton["state"] = tk.DISABLED
 	else:
 		saveButton["state"] = tk.NORMAL
 
 #
 # Timer callback for continousSave
-# Set up callback 
 # Receive tick, do the job, then set up the next callback
 #
 def continuousSaveTick ():
@@ -182,6 +182,21 @@ class BookmarkW:
 	def hideBookmark (self):
 		self.main.grid_forget()
 
+	# Make the widget blank, altn for those we currently don't need
+	def clearBookmark (self):
+		self.bookmark = None
+
+		# Empty out fields of all our widgets
+		self.thumbImage = None
+		self.thumbw.delete(tk.ALL)
+		self.titlew["text"] = ""
+		self.urlw["text"] = ""
+		self.selectionw["text"] = ""
+		self.timew["text"] = ""
+
+		# Ditto, set our parameters here not above
+		self.main.grid (sticky=tk.E + tk.W)
+
 	# Tell browser to go to our bookmarked page
 	def callback (self, ignoreevent):
 		pad.sendBookmark (self.bookmark.url)
@@ -272,7 +287,7 @@ continuousSaveBox = ttk.Checkbutton (controlPanel, text="Save continuously", var
 continuousSaveVar.trace ("w", continuousSaveVarCB)
 continuousSaveBox.grid (row=1, column=1)
 
-# Override brain state
+# Override brain state (does not apply to view/save if each is in continuous mode)
 overrideFrame = tk.LabelFrame (controlPanel, text="Override for next command only")
 overrideFrame.grid (row=2, column=0, columnspan=2, sticky="we")
 overrideVar = tk.IntVar()

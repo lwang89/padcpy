@@ -75,6 +75,7 @@ def continuousSaveVarCB (*ignoreargs):
 #
 # Timer callback for continousSave
 # Receive tick, do the job, then set up the next callback
+# Unlike regular saveCB, we do not do a viewCB(), to prevent jumpiness/biofeedback
 #
 def continuousSaveTick ():
 	if continuousSaveVar.get()==1:
@@ -82,7 +83,6 @@ def continuousSaveTick ():
 		
 		if bookmark.url not in map (lambda b: b.url, pad.allPads[pad.currentState].bookmarks):
 			pad.allPads[pad.currentState].add (bookmark)
-			viewCB()
 
 		top.after (1000, continuousSaveTick)
 

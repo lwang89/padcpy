@@ -8,6 +8,7 @@ import tkinter as tk
 import tkinter.ttk as ttk
 
 import pad
+import filter
 import brainclient
 
 ############################################################
@@ -201,6 +202,9 @@ class BookmarkW:
 # COMMUNICATE WITH BRAIN DEVICE
 ############################################################
 
+# Instantiate our filter
+myfilter = filter.HystFilter()
+
 # Call from brainclient, arg = line of text from matlab
 # First item (before ";") = ML classifier output A/B/C/etc.
 # This is coming from a separate thread,
@@ -217,7 +221,14 @@ def brainCB (line):
 		print ("brainCB: can't parse input line: " + line, file=sys.stderr)
 
 	else:
-		pad.currentState = pad.brainCategories.index (tokens[0][0])
+		# Apply filter if in continuous view mode
+		# NB filter is not applied to user radio button inputs
+		if continuousViewVar.get()==1:
+			inp = myfilter.process (tokens[0][0])
+		else:
+			inp = tokens[0][0]
+
+		pad.currentState = pad.brainCategories.index (inp)
 
 		# Display it back to user via the radio
 		brainVar.set (pad.currentState)

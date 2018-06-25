@@ -10,7 +10,7 @@
 import pad
 
 class HystFilter:
-	def __init__ (self, nsame=4, nexceptions=1):
+	def __init__ (self, nsame=5, nexceptions=2):
 		self.nsame = nsame
 		self.nexceptions = nexceptions
 

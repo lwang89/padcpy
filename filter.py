@@ -7,12 +7,14 @@
 # The filter wants to see nsame of the same category in a row,
 # except permitting for nexceptions
 
+import pad
+
 class HystFilter:
 	def __init__ (self, nsame=4, nexceptions=1):
 		self.nsame = nsame
 		self.nexceptions = nexceptions
 
-		# Saves as much recent input data as we'd ever need,
+		# Saves as much recent input data as we use,
 		# latest value at beginning
 		self.data = []
 
@@ -22,53 +24,69 @@ class HystFilter:
 	def process (self, inp):
 		self.data.insert (0, inp)
 
-		# Truncate to the max we'll ever need
+		# Truncate to the max we use
 		# BTW this creates new copy, can use "del" to delete in place
 		self.data = self.data[:(self.nsame + self.nexceptions)]
 
-###		NOW count up see if we have nsame of the same
-###			if so return that, ie self.lastOutput = xxx
-###                	if tied, return most recent? ditto
+		# Count up our data to see if we have a winner
+		# This just counts the number of times each brainCategory appears,
+		# in weird functional programming style
+		counts = sorted (
+			# make pairs of [count, category]
+			map (lambda cat:
+				     # calculate count for given category
+				     [len (list (filter (lambda dat:
+						dat==cat, self.data))), cat], pad.brainCategories))
 
-		# When just getting started, no data yet
+		# See if we have a winner
+		same = counts[-1] # is a little array of [count, category]
+		exceptions = sum (list (map (lambda x: x[0], counts))[:-1])
+		if same[0]>=self.nsame and exceptions<=self.nexceptions:
+			self.lastOutput = same[1]
+
+		# In case just getting started, no data yet
 		if self.lastOutput == None:
 			self.lastOutput = inp
 
-		# If nothing wins, then we end up here with no change from last ouput
+		# If no winner, then we send same as our last ouput
 		return self.lastOutput
 
-# Simple unit test
-import sys
+#
+# SIMPLE UNIT TEST
+#
 
-filter = HystFilter()
+if __name__=="__main__":
+	import sys
 
-print ("A", filter.process("A"))
-print ("B", filter.process("B"))
-print ("C", filter.process("C"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("B", filter.process("B"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("B", filter.process("B"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("C", filter.process("C"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("A", filter.process("A"))
-print ("C", filter.process("C"))
-print ("A", filter.process("A"))
-print ("C", filter.process("C"))
-print ("C", filter.process("C"))
-print ("C", filter.process("C"))
-print ("C", filter.process("C"))
-print ("C", filter.process("C"))
-print ("C", filter.process("C"))
-print ("C", filter.process("C"))
-print ("B", filter.process("B"))
+	myfilter = HystFilter()
+
+	print ("B", "->", myfilter.process("B"))
+	print ("B", "->", myfilter.process("B"))
+	print ("C", "->", myfilter.process("C"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("B", "->", myfilter.process("B"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("B", "->", myfilter.process("B"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("C", "->", myfilter.process("C"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("A", "->", myfilter.process("A"))
+	print ("C", "->", myfilter.process("C"))
+	print ("A", "->", myfilter.process("A"))
+	print ("C", "->", myfilter.process("C"))
+	print ("C", "->", myfilter.process("C"))
+	print ("C", "->", myfilter.process("C"))
+	print ("C", "->", myfilter.process("C"))
+	print ("C", "->", myfilter.process("C"))
+	print ("C", "->", myfilter.process("C"))
+	print ("C", "->", myfilter.process("C"))
+	print ("B", "->", myfilter.process("B"))

@@ -221,16 +221,12 @@ def brainCB (line):
 		print ("brainCB: can't parse input line: " + line, file=sys.stderr)
 
 	else:
-		# Apply filter if in continuous view mode
-		# NB filter is not applied to user radio button inputs
-		if continuousViewVar.get()==1:
-			inp = myfilter.process (tokens[0][0])
-		else:
-			inp = tokens[0][0]
-
+		inp = tokens[0][0]
+		# NB filter is applied here, but not to user GUI inputs
+		inp = myfilter.process (inp)
 		pad.currentState = pad.brainCategories.index (inp)
 
-		# Display it back to user via the radio
+		# Display it back to user via the radio buttons
 		brainVar.set (pad.currentState)
 
 		# ...which will also trigger a viewCB() so no need for us to call it

@@ -223,6 +223,7 @@ def brainCB (line):
 	else:
 		inp = tokens[0][0]
 		# NB filter is applied here, but not to user GUI inputs
+		# If you don't want filtering, delete the next line
 		inp = myfilter.process (inp)
 		pad.currentState = pad.brainCategories.index (inp)
 

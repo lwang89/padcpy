@@ -12,9 +12,10 @@
 import pad
 
 class HystFilter:
-	def __init__ (self, nsame=5, ntotal=7):
-		self.nsame = nsame
-		self.ntotal = ntotal
+	def __init__ (self):
+		# User-settable parameters
+		self.nsame = 5
+		self.ntotal = 7
 
 		# Saves as much recent input data as we'll use,
 		# latest value at beginning

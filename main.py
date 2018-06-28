@@ -48,9 +48,9 @@ def viewCB ():
 	for i in range (ndraw):
 		bookmarkWidgets[i].showBookmark (bookmarks[i])
 
-	# Make the rest of them, if any, invisible
+	# Make the rest of them, if any, empty
 	for i in range (ndraw, len(bookmarkWidgets)):
-		bookmarkWidgets[i].hideBookmark()
+		bookmarkWidgets[i].clearBookmark()
 
 #
 # Observer callback, ie when value changes: Toggle continuous view refresh.
@@ -113,8 +113,7 @@ class BookmarkW:
 		style = ttk.Style()
 
 		self.main = ttk.Frame (bookmarksPanel)
-		# We will set our grid() parameters below not here
-		self.main.grid (row=0, column=0)
+		self.main.grid (sticky=tk.E + tk.W)
 
 		self.main.grid_rowconfigure(0, weight=1)
 		sep = ttk.Separator (self.main, orient="horizontal")
@@ -149,8 +148,8 @@ class BookmarkW:
 		# Attach our callback to our widget and everything inside
 		self._bindAll (self.main, "<Button-1>")
 
-		# Hide ourself until someone uses us
-		self.main.grid_forget()
+		# Other initialization, shared with clearBookmark()
+		self.clearBookmark()
 
 	# Private helper function, for recursive binding
 	def _bindAll (self, root, event):
@@ -158,6 +157,16 @@ class BookmarkW:
 		if len(root.children.values())>0:
 			for child in root.children.values():
 				self._bindAll (child, event)
+
+	# Clear the widget, for those we currently don't need,
+	# but don't hide it, cause want to maintain window spacing.
+	def clearBookmark (self):
+		self.thumbw.delete(tk.ALL)
+
+		self.titlew["text"] = ""
+		self.urlw["text"] = ""
+		self.selectionw["text"] = ""
+		self.timew["text"] = ""
 
 	# Populate this widget with data from the given bookmark
 	def showBookmark (self, bookmark):
@@ -174,13 +183,6 @@ class BookmarkW:
 		self.urlw["text"] = self._shorten (self.bookmark.url, urlWidth)
 		self.selectionw["text"] = self._shorten (self.bookmark.selection, selectionWidth)
 		self.timew["text"] = "%.0f sec. ago" % (datetime.datetime.today() - self.bookmark.time).total_seconds()
-
-		# Set our parameters here not above
-		self.main.grid (sticky=tk.E + tk.W)
-
-	# Hide the widget, for those we currently don't need
-	def hideBookmark (self):
-		self.main.grid_forget()
 
 	# Tell browser to go to our bookmarked page
 	def callback (self, ignoreevent):
